@@ -1,6 +1,6 @@
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { GOOGLE_MAP_API_KEY } from "../../config";
-const HospitalMap = ({ location, hospitals }) => {
+const HospitalMap = ({ hospitals }) => {
   const mapStyles = {
     height: "400px",
     width: "100%",
@@ -16,7 +16,10 @@ const HospitalMap = ({ location, hospitals }) => {
         {hospitals.map((hospital, index) => {
           <Marker
             key={index}
-            position={{ lat: hospital.latitude, lng: hospital.longitude }}
+            position={{
+              lat: hospital.geometry.location.lat,
+              lng: hospital.geometry.location.lng,
+            }}
             label="H"
           />;
         })}
