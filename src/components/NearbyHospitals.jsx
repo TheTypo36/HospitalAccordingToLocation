@@ -7,12 +7,19 @@ const NearbyHospitals = () => {
 
   const [hospitals, setHospitals] = useState([]);
 
-  const fetchNearByHospital = async () => {
+  const fetchNearByHospital = async (latitude, longitude) => {
     const apiKey = "AIzaSyB-irOAyomJqmStg6RcJ5rZ2TLB28msNJQ";
     const radius = 10000;
-    const url = `https://maps.googleapis.com/maps/api/place/neabysearch/json?location=${latitude},${longitude}&radius=${radius}&type=hospital&key=${apiKey}`;
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=hospital&key=${apiKey}`;
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*", // This won't work unless set on the server
+        },
+        mode: "cors", // "no-cors" will block the response data
+      });
       const data = await response.json();
       return data.results;
     } catch (error) {

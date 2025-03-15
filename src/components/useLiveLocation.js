@@ -26,6 +26,8 @@ const useLiveLocation = () => {
 
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
+
+  return { location, error };
 };
 
 export default useLiveLocation;
