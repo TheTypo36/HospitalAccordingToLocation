@@ -22,11 +22,18 @@ app.use("/", router);
 
 io.on("connection", (socket) => {
   console.log(`user connected: ${socket.id}`);
-
-  socket.on("send-message", (data) => {
-    io.emit("received-message", data);
+  socket.on("join-room", ({ username, room }) => {
+    socket.join(room);
+    console.log(`${username} joined room: ${room}`);
+  });
+  socket.on("send-message", ({ room, message, sender }) => {
+    io.to(room).emit("received-message", { sender, message });
   });
 
+  socket.on("leave-room", (room) => {
+    socket.leave(room);
+    console.log(`user ${socket.id} left the room ${room}`);
+  });
   socket.on("disconnect", () => {
     console.log("user disconnected", socket.id);
   });
