@@ -1,11 +1,16 @@
 import React, { useEffect, useRef, useState, useCallback, use } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:7001", {
-  withCredentials: true,
-  transports: ["websocket"],
-  upgrade: false,
-});
+const socket = io(
+  process.env.NODE_ENV === "production"
+    ? "https://hospitalaccordingtolocation.onrender.com"
+    : "http://localhost:7001",
+  {
+    withCredentials: true,
+    transports: ["websocket"],
+    upgrade: false,
+  }
+);
 
 const Chat = ({ username, room }) => {
   const [message, setMessage] = useState("");
