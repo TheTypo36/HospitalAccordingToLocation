@@ -2,56 +2,72 @@ import express, { Router } from "express";
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
-import axios from "axios";
 import dotenv from "dotenv";
-dotenv.config();
-const app = express();
 
+dotenv.config();
+
+const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
     methods: ["GET", "POST"],
+    credentials: true,
+    allowedHeaders: ["content-Type"],
   },
 });
+
 app.use(cors());
+
 const PORT = process.env.PORT || 7001;
 const router = Router();
 app.use("/", router);
 
 io.on("connection", (socket) => {
-  console.log(`user connected: ${socket.id}`);
-  socket.on("join-room", ({ username, room }) => {
+  console.log(`✅ User connected: ${socket.id}`);
+
+  socket.on("join-room", ({ room, username }) => {
+    console.log(`🚪 ${socket.id} joined room: ${room}`);
     socket.join(room);
-    console.log(`${username} joined room: ${room}`);
-  });
-  socket.on("send-message", ({ room, message, sender }) => {
-    io.to(room).emit("received-message", { sender, message });
+    socket.to(room).emit("user-connected", { from: socket.id, username });
+
+    // Handle WebRTC signaling
+    socket.on("offer", (offer) => {
+      console.log("📡 Received offer:", offer);
+      socket.to(room).emit("offer", offer);
+    });
+
+    socket.on("answer", (answer) => {
+      console.log("📡 Received answer:", answer);
+      socket.to(room).emit("answer", answer);
+    });
+
+    socket.on("ice-candidate", (candidate) => {
+      console.log("❄️ ICE Candidate received");
+      socket.to(room).emit("ice-candidate", candidate);
+    });
+
+    // Handle chat messages
+    socket.on("send-message", ({ room, message, sender }) => {
+      io.to(room).emit("received-message", { sender, message });
+    });
+
+    // Handle user leaving manually
+    socket.on("leave-room", ({ username, room }) => {
+      console.log(`🚪 User ${username} left room ${room}`);
+      socket.leave(room);
+      socket.to(room).emit("user-disconnected", { username });
+    });
   });
 
-  socket.on("leave-room", (room) => {
-    socket.leave(room);
-    console.log(`user ${socket.id} left the room ${room}`);
-  });
+  // Handle user disconnection
   socket.on("disconnect", () => {
-    console.log("user disconnected", socket.id);
+    console.log(`❌ User disconnected: ${socket.id}`);
+    io.emit("user-disconnected", { userId: socket.id });
   });
-});
-router.route("/api/hospitals").get(async (req, res) => {
-  try {
-    const { lat, lng } = req.query;
-
-    const apiKey = process.env.GOOGLE_MAP_API_KEY;
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=10nn000&type=hospital&key=${apiKey}&&keyword=government+hospital|AIIMS|Mahaveer&type=hospital|university|research_institute`;
-    const response = await axios.get(url);
-
-    return res.status(200).json(response.data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 });
 
 server.listen(PORT, () => {
-  console.log("server is running at", PORT);
+  console.log(`🚀 Server is running at port ${PORT}`);
 });

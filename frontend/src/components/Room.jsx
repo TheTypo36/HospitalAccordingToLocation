@@ -10,6 +10,8 @@ const Room = () => {
   const joinRoom = () => {
     if (username.trim() && room.trim()) {
       setJoined(true);
+      setUsername(username.trim());
+      setRoom(room.trim());
     }
   };
   return (
