@@ -9,8 +9,8 @@ function App() {
       <LoadScript googleMapsApiKey={GOOGLE_MAP_API_KEY}>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<NearbyHospitals />} />
-            <Route path="/Room" element={<Room />} />
+            <Route path="/" element={<Room />} />
+            <Route path="/hospital" element={<NearbyHospitals />} />
           </Routes>
         </BrowserRouter>
       </LoadScript>
