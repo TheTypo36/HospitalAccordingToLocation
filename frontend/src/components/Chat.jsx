@@ -213,6 +213,7 @@ const Chat = ({ username, room }) => {
         </div>
         <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
           <video
+            controls
             ref={myVideo}
             autoPlay
             playsInline
@@ -231,6 +232,7 @@ const Chat = ({ username, room }) => {
             </h2>
           )}
           <video
+            controls
             ref={userVideo}
             autoPlay
             playsInline
